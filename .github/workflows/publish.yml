@@ -31,6 +31,8 @@ jobs:
           node-version: 12
       - name: Install electron builder
         run: npm i -g electron-builder
+      - name: Install missing module
+        run: npm i
       # Runs a single command using the runners shell
       - name: Build/release Electron app
         run: npm run dist
