@@ -2,7 +2,7 @@
 
 name: Electron publissh
 
-# Controls when the action will run. 
+# Controls when the action will run.
 on:
   # Triggers the workflow on push or pull request events but only for the main branch
   push:
@@ -29,6 +29,8 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: 12
+      - name: Install electron builder
+        run: npm i -g electron-builder
       # Runs a single command using the runners shell
       - name: Build/release Electron app
         run: npm run dist
