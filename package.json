@@ -7,8 +7,8 @@
   "scripts": {
     "start": "NODE_ENV=development npx electron-forge start",
     "build": "electron-builder",
-		"postinstall": "electron-builder install-app-deps",
-		"dist": "electron-builder --publish always",
+    "postinstall": "electron-builder install-app-deps",
+    "dist": "electron-builder --publish always",
     "pack": "electron-builder --dir"
   },
   "keywords": [],
@@ -16,50 +16,30 @@
     "name": "Tenji",
     "email": "patricepetit@hotmail.com"
   },
-
   "build": {
     "appId": "tenji.cpu-monitor",
-		"productName": "cpu-monitor",
-		"linux": {
-			"target": ["AppImage"],
-			"category": "Office"
-		},
-		"win": {
-			"target": "squirrel"
-		},
-		"publish": [
-			{ "provider": "github" }
-		]
+    "productName": "cpu-monitor",
+    "linux": {
+      "target": [
+        "AppImage"
+      ],
+      "category": "Office"
+    },
+    "win": {
+      "target": [
+        "squirrel",
+        "nsis"
+      ]
+    },
+    "publish": [
+      {
+        "provider": "github"
+      }
+    ]
   },
   "license": "MIT",
-  "config": {
-    "forge": {
-      "packagerConfig": {},
-      "makers": [
-        {
-          "name": "@electron-forge/maker-squirrel",
-          "config": {
-            "name": "cool_app"
-          }
-        },
-        {
-          "name": "@electron-forge/maker-zip",
-          "platforms": [
-            "darwin"
-          ]
-        },
-        {
-          "name": "@electron-forge/maker-deb",
-          "config": {}
-        },
-        {
-          "name": "@electron-forge/maker-rpm",
-          "config": {}
-        }
-      ]
-    }
-  },
   "dependencies": {
+    "electron-builder-squirrel-windows": "^22.10.5",
     "electron-squirrel-startup": "^1.0.0",
     "os-utils": "^0.0.14"
   },
