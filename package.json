@@ -27,8 +27,8 @@
     },
     "win": {
       "target": [
-        "squirrel",
-        "nsis"
+        "nsis",
+				"portable"
       ]
     },
     "publish": [
@@ -39,7 +39,6 @@
   },
   "license": "MIT",
   "dependencies": {
-    "electron-builder-squirrel-windows": "^22.10.5",
     "electron-squirrel-startup": "^1.0.0",
     "os-utils": "^0.0.14"
   },
