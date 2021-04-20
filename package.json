@@ -6,11 +6,9 @@
   "main": "src/index.js",
   "scripts": {
     "start": "NODE_ENV=development npx electron-forge start",
-    "package": "electron-forge package",
-    "make": "electron-forge make",
-    "publish": "electron-forge publish",
-    "lint": "echo \"No linting configured\"",
-    "dist": "electron-builder",
+    "build": "electron-builder",
+		"postinstall": "electron-builder install-app-deps",
+		"dist": "electron-builder --publish always",
     "pack": "electron-builder --dir"
   },
   "keywords": [],
@@ -23,7 +21,8 @@
     "appId": "tenji.cpu-monitor",
 		"productName": "cpu-monitor",
 		"linux": {
-			"target": "appImage"
+			"target": ["AppImage"],
+			"category": "Office"
 		}
   },
   "license": "MIT",
