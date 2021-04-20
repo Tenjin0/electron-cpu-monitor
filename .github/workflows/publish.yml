@@ -1,6 +1,6 @@
 # This is a basic workflow to help you get started with Actions
 
-name: Electron publissh
+name: Electron publish
 
 # Controls when the action will run.
 on:
@@ -34,3 +34,6 @@ jobs:
       # Runs a single command using the runners shell
       - name: Build/release Electron app
         run: npm run dist
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
