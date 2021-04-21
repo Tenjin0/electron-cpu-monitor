@@ -1,12 +1,15 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, session } = require('electron');
 const path = require('path');
-const os = require('os-utils');
+const os = require('os')
+const osUtils = require('os-utils');
+const package = require('../package.json')
+const { autoUpdater } = require('electron-updater');
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
-if (require('electron-squirrel-startup')) { // eslint-disable-line global-require
-  app.quit();
-}
-
+// if (require('electron-squirrel-startup')) { // eslint-disable-line global-require
+//   app.quit();
+// }
+autoUpdater.setFeedURL({provider: "github", url: package.repository.url, token: process.env.GH_TOKEN})
 const createWindow = () => {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
@@ -30,19 +33,50 @@ const createWindow = () => {
 		mainWindow.close()
 	})
 
-  os.cpuUsage(function(v) {
+	ipcMain.on("app_version", () => {
+		console.log("app_version")
+		mainWindow.webContents.send("app_version", app.getVersion())
+	})
+
+  osUtils.cpuUsage(function(v) {
     mainWindow.webContents.send("cpu", v * 100)
-    mainWindow.webContents.send("mem", os.freememPercentage() *  100)
-    mainWindow.webContents.send("total-mem", os.totalmem() / 1024)
+    mainWindow.webContents.send("mem", osUtils.freememPercentage() *  100)
+    mainWindow.webContents.send("total-mem", osUtils.totalmem() / 1024)
     setInterval(() => {
       mainWindow.webContents.send("cpu", v * 100)
-      mainWindow.webContents.send("mem", os.freememPercentage() *  100)
-      mainWindow.webContents.send("total-mem", os.totalmem() / 1024)
+      mainWindow.webContents.send("mem", osUtils.freememPercentage() *  100)
+      mainWindow.webContents.send("total-mem", osUtils.totalmem() / 1024)
     }, 1000)
 
   })
-};
 
+	mainWindow.once('ready-to-show', () => {
+		autoUpdater.checkForUpdates().then((updatedResult) => {
+			console.log(updatedResult)
+		}).catch((err) => {
+		})
+	});
+	autoUpdater.on('update-available', () => {
+		mainWindow.webContents.send('update_available');
+	});
+	autoUpdater.on('update-downloaded', () => {
+		mainWindow.webContents.send('update_downloaded');
+	});
+};
+// const reduxDevToolsPath = path.join(
+// 	os.homedir(),
+// 	'/.config/google-chrome/Default/Extensions/lmhkpmbekcpmknklioeibfkpmmfibljd/2.17.0_0'
+// )
+// const reactDevToolsPath = path.join(
+// 	os.homedir(),
+// 	'/.config/google-chrome/Default/Extensions/fmkadmapgofadopljbjfkapdkoienihi/4.12.3_0'
+// )
+// console.log(reactDevToolsPath)
+// console.log(reduxDevToolsPath)
+// app.whenReady().then(async () => {
+// 	await session.defaultSession.loadExtension(reactDevToolsPath)
+// 	await session.defaultSession.loadExtension(reduxDevToolsPath)
+// })
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
@@ -64,6 +98,8 @@ app.on('activate', () => {
     createWindow();
   }
 });
+
+
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and import them here.

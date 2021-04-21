@@ -12,29 +12,40 @@
   </head>
   <body>
     <button  id="close-button"type="button" class="btn-close btn-close-white" aria-label="Close"></button>
-    <div class="container">
-      <div class="row">
-        <div class="col md-4 d-flex flex-column justify-content-center align-items-center">
-          <div class="label">
-            CPU(%)
-          </div>
-          <h1 id="cpu"></h1>
-        </div>
-        <div class="col md-4 d-flex flex-column justify-content-center align-items-center">
-          <div class="label">
-            Free mem(%)
-          </div>
-          <h1 id="mem"></h1>
 
-        </div>
-        <div class="col md-4 d-flex flex-column justify-content-center align-items-center">
-          <div class="label">
-            Total Mem (GB)
-          </div>
-          <h1 id="total-mem"></h1>
+		<div class="header">
+			Version:&nbsp;<span id="app-version"></span>
+		</div>
+		<div class="content">
+			<div class="container">
 
-        </div>
-      </div>
-    </div>
+				<div class="row">
+
+					<div class="col md-4 d-flex flex-column justify-content-center align-items-center">
+						<div class="label">
+							CPU(%)
+						</div>
+						<h1 id="cpu"></h1>
+					</div>
+
+					<div class="col md-4 d-flex flex-column justify-content-center align-items-center">
+						<div class="label">
+							Free mem(%)
+						</div>
+						<h1 id="mem"></h1>
+					</div>
+
+					<div class="col md-4 d-flex flex-column justify-content-center align-items-center">
+						<div class="label">
+							Total Mem (GB)
+						</div>
+						<h1 id="total-mem"></h1>
+					</div>
+
+				</div>
+
+			</div>
+		</div>
+
   </body>
 </html>
