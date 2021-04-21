@@ -1,15 +1,17 @@
-const { app, BrowserWindow, ipcMain, session } = require('electron');
+const { app, BrowserWindow, ipcMain, session, dialog } = require('electron');
 const path = require('path');
 const os = require('os')
 const osUtils = require('os-utils');
 const package = require('../package.json')
-const { autoUpdater } = require('electron-updater');
-
+const { autoUpdater,  } = require('electron-updater');
+const log = require("electron-log");
+const {inspect} = require('util')
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 // if (require('electron-squirrel-startup')) { // eslint-disable-line global-require
 //   app.quit();
 // }
-autoUpdater.setFeedURL({provider: "github", url: package.repository.url, token: process.env.GH_TOKEN})
+
+let updateAvailable = null
 const createWindow = () => {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
@@ -18,11 +20,12 @@ const createWindow = () => {
       nodeIntegration: true,
       contextIsolation: false
     },
+		show:false,
 		icon: path.join(__dirname, 'logo.png'),
 		fullscreen: true
   });
 
-  mainWindow.loadFile(path.join(__dirname, 'index.html'));
+	mainWindow.loadFile(path.join(__dirname, 'index.html'));
   mainWindow.show()
 
 	if (process.env.NODE_ENV && process.env.NODE_ENV === 'development') {
@@ -33,8 +36,20 @@ const createWindow = () => {
 		mainWindow.close()
 	})
 
+	ipcMain.on("download_update", () => {
+		console.log("download_update")
+		if (updateAvailable) {
+			autoUpdater.checkForUpdatesAndNotify().then((resultDownload) => {
+				console.log("!!!!")
+				console.log(resultDownload)
+			})
+			.catch((err) => {
+				log.error(err)
+			})
+		}
+	})
+
 	ipcMain.on("app_version", () => {
-		console.log("app_version")
 		mainWindow.webContents.send("app_version", app.getVersion())
 	})
 
@@ -51,17 +66,53 @@ const createWindow = () => {
   })
 
 	mainWindow.once('ready-to-show', () => {
+		mainWindow.show()
+		mainWindow.webContents.send("ready")
+
 		autoUpdater.checkForUpdates().then((updatedResult) => {
+			updateAvailable = updatedResult.updateInfo
 			console.log(updatedResult)
+			mainWindow.webContents.send('update_available', updatedResult.updateInfo.version);
 		}).catch((err) => {
+			log.error(err)
 		})
 	});
+
+	autoUpdater.on('download-progress', (progressObj) => {
+		console.log(progressObj)
+	})
 	autoUpdater.on('update-available', () => {
-		mainWindow.webContents.send('update_available');
+		console.log('>>>>>>>update-available')
+		// mainWindow.webContents.send('update_available');
 	});
-	autoUpdater.on('update-downloaded', () => {
-		mainWindow.webContents.send('update_downloaded');
-	});
+
+
+	autoUpdater.on('error', message => {
+		console.error('There was a problem updating the application')
+		log.error(message)
+	})
+	autoUpdater.on('update-downloaded', (event, releaseNotes, releaseName) => {
+		console.log('>>>>>>>update-downloaded')
+		const dialogOpts = {
+			type: 'info',
+			buttons: ['Restart', 'Later'],
+			title: 'Application Update',
+			message: process.platform === 'win32' ? releaseNotes : releaseName,
+			detail: "A new version has been downloaded. Restart the application to apply the updates."
+		}
+
+		dialog.showMessageBox(dialogOpts).then((returnValue) => {
+			if (returnValue.response === 0) autoUpdater.quitAndInstall()
+		})
+	})
+
+	autoUpdater.allowDowngrade = true
+	autoUpdater.autoDownload = false
+	autoUpdater.logger = log;
+	autoUpdater.logger.transports.file.level = "info";
+	autoUpdater.setFeedURL({
+		provider: "github", "owner": "tenjin0",	"repo": "electron-cpu-monitor"
+	})
 };
 // const reduxDevToolsPath = path.join(
 // 	os.homedir(),

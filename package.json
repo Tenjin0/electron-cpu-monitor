@@ -1,10 +1,11 @@
 {
-  "name": "cpu-monitor",
-  "productName": "cpu-monitor",
+  "name": "electron-cpu-monitor",
+  "productName": "electron-cpu-monitor",
   "version": "1.0.1",
   "description": "cpu usage electron app",
   "main": "src/index.js",
   "scripts": {
+    "postversion": "git push --follow-tags",
     "start": "NODE_ENV=development npx electron-forge start",
     "build": "electron-builder",
     "postinstall": "electron-builder install-app-deps",
@@ -31,11 +32,13 @@
         "portable"
       ]
     },
-    "publish": [
-      {
-        "provider": "github"
-      }
-    ]
+    "publish": {
+      "provider": "github",
+      "owner": "Tenjin0",
+      "repo": "electron-cpu-monitor",
+      "releaseType": "draft",
+      "channel": "latest"
+    }
   },
   "repository": {
     "type": "git",
@@ -43,6 +46,7 @@
   },
   "license": "MIT",
   "dependencies": {
+    "electron-log": "^4.3.4",
     "electron-updater": "^4.3.8",
     "os-utils": "^0.0.14"
   },

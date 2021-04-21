@@ -33,12 +33,32 @@ body {
   color:#efa;
 }
 
-#close-button {
+#close-app-button {
   position: absolute;
   top: 10px;
   right: 10px;
 }
 
-#close-button.btn-close:focus {
+#close-app-button.btn-close:focus {
   box-shadow: none;
+}
+
+#notification {
+	color: black;
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  width: 300px;
+  padding: 20px;
+  border-radius: 5px;
+  background-color: white;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+}
+
+#notification .notification-buttons {
+	margin-top: 30px;
+}
+
+.hidden {
+  display: none !important;
 }

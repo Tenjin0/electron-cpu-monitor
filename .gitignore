@@ -92,3 +92,6 @@ out/
 dist
 
 temp
+
+
+electron-builder.yml

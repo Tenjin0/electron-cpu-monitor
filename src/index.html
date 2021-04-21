@@ -11,10 +11,9 @@
 
   </head>
   <body>
-    <button  id="close-button"type="button" class="btn-close btn-close-white" aria-label="Close"></button>
-
+    <button  id="close-app-button"type="button" class="btn-close btn-close-white" aria-label="Close"></button>
 		<div class="header">
-			Version:&nbsp;<span id="app-version"></span>
+			Version:&nbsp;<div id="app-version"></div>
 		</div>
 		<div class="content">
 			<div class="container">
@@ -47,5 +46,19 @@
 			</div>
 		</div>
 
+		<div id="notification" class="hidden">
+			<div id="message"></div>
+			<div class="notification-buttons d-flex justify-content-between">
+				<button class="btn btn-primary btn-sm hidden" id="download-button" onClick="downloadUpdate()">
+					Download
+				</button>
+				<button class="btn btn-primary btn-sm hidden" id="restart-button" onClick="restartApp()">
+					Restart
+				</button>
+				<button class="btn btn-default btn-sm hidden" id="close-button" onClick="closeNotification()">
+					Close
+				</button>
+			</div>
+			</div>
   </body>
 </html>
