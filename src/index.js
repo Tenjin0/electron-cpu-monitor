@@ -11,7 +11,7 @@ const {inspect} = require('util')
 //   app.quit();
 // }
 
-let updateAvailable = null
+let cancellationToken = null
 const createWindow = () => {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
@@ -37,13 +37,11 @@ const createWindow = () => {
 	})
 
 	ipcMain.on("download_update", () => {
-		console.log("download_update")
-		if (updateAvailable) {
-			autoUpdater.checkForUpdatesAndNotify().then((resultDownload) => {
-				console.log("!!!!")
-				console.log(resultDownload)
+		if (cancellationToken) {
+			return autoUpdater.downloadUpdate(cancellationToken).then(() => {
+					console.log('try to download')
 			})
-			.catch((err) => {
+		.catch((err) => {
 				log.error(err)
 			})
 		}
@@ -70,7 +68,7 @@ const createWindow = () => {
 		mainWindow.webContents.send("ready")
 
 		autoUpdater.checkForUpdates().then((updatedResult) => {
-			updateAvailable = updatedResult.updateInfo
+			cancellationToken = updatedResult.cancellationToken
 			console.log(updatedResult)
 			mainWindow.webContents.send('update_available', updatedResult.updateInfo.version);
 		}).catch((err) => {
@@ -81,6 +79,12 @@ const createWindow = () => {
 	autoUpdater.on('download-progress', (progressObj) => {
 		console.log(progressObj)
 	})
+
+	autoUpdater.on('update-not-available', () => {
+		console.log('>>>>>>>update-not-available')
+		// mainWindow.webContents.send('update_available');
+	});
+
 	autoUpdater.on('update-available', () => {
 		console.log('>>>>>>>update-available')
 		// mainWindow.webContents.send('update_available');
@@ -92,7 +96,6 @@ const createWindow = () => {
 		log.error(message)
 	})
 	autoUpdater.on('update-downloaded', (event, releaseNotes, releaseName) => {
-		console.log('>>>>>>>update-downloaded')
 		const dialogOpts = {
 			type: 'info',
 			buttons: ['Restart', 'Later'],
