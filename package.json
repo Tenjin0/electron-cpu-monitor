@@ -1,7 +1,7 @@
 {
   "name": "cpu-monitor",
   "productName": "cpu-monitor",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "cpu usage electron app",
   "main": "src/index.js",
   "scripts": {
@@ -37,10 +37,10 @@
       }
     ]
   },
-	"repository": {
-		"type" : "git",
-		"url" : "https://github.com/Tenjin0/electron-cpu-monitor.git"
-	},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Tenjin0/electron-cpu-monitor.git"
+  },
   "license": "MIT",
   "dependencies": {
     "electron-updater": "^4.3.8",
