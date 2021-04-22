@@ -47,6 +47,8 @@ const createWindow = () => {
 		}
 	})
 
+
+
 	ipcMain.on("app_version", () => {
 		mainWindow.webContents.send("app_version", app.getVersion())
 	})
@@ -63,14 +65,25 @@ const createWindow = () => {
 
   })
 
+
+	ipcMain.on("check_update", () => {
+		autoUpdater.checkForUpdates().then((updatedResult) => {
+			cancellationToken = updatedResult.cancellationToken
+			// console.log(updatedResult)
+			// mainWindow.webContents.send('update_available', updatedResult.updateInfo.version);
+		}).catch((err) => {
+			log.error(err)
+		})
+	})
+
 	mainWindow.once('ready-to-show', () => {
 		mainWindow.show()
 		mainWindow.webContents.send("ready")
 
 		autoUpdater.checkForUpdates().then((updatedResult) => {
 			cancellationToken = updatedResult.cancellationToken
-			console.log(updatedResult)
-			mainWindow.webContents.send('update_available', updatedResult.updateInfo.version);
+			// console.log(updatedResult)
+			// mainWindow.webContents.send('update_available', updatedResult.updateInfo.version);
 		}).catch((err) => {
 			log.error(err)
 		})
@@ -83,12 +96,12 @@ const createWindow = () => {
 
 	autoUpdater.on('update-not-available', () => {
 		console.log('>>>>>>>update-not-available')
-		// mainWindow.webContents.send('update_available');
+		mainWindow.webContents.send('update_not_available');
 	});
 
-	autoUpdater.on('update-available', () => {
-		console.log('>>>>>>>update-available')
-		// mainWindow.webContents.send('update_available');
+	autoUpdater.on('update-available', (data) => {
+		console.log('>>>>>>>update-available', data)
+		mainWindow.webContents.send('update_available', data.version);
 	});
 
 

@@ -5,13 +5,14 @@ const ipcRenderer = electron.ipcRenderer;
 let closeNotificationButton  = null
 let restartNotificationButton  = null
 let downloadNotificationButton  = null
+let checkUpdateNotificationButton  = null
 let notification = null
 let message = null
 // const restartButton = document.getElementById('restart-button');
 
 ipcRenderer.on('update_available', (event, version) => {
 	console.log('update_available', version)
-  ipcRenderer.removeAllListeners('update_available');
+  // ipcRenderer.removeAllListeners('update_available');
 	if (message) {
 		message.innerText = 'Last update is available. (' + version + ')';
 	}
@@ -53,7 +54,30 @@ ipcRenderer.on("total-mem", (event, data) => {
 })
 
 function closeNotification() {
-  notification.classList.add('hidden');
+	if (!notification.classList.contains("hidden")) {
+		notification.classList.add('hidden');
+	}
+	if (!closeNotificationButton.classList.contains("hidden")) {
+		closeNotificationButton.classList.add('hidden');
+	}
+	if (!downloadNotificationButton.classList.contains("hidden")) {
+		downloadNotificationButton.classList.add('hidden');
+	}
+	setTimeout(() => {
+		if (message) {
+			message.innerText = 'Check update ?';
+		}
+		if (notification) {
+			notification.classList.remove('hidden');
+			checkUpdateNotificationButton.classList.remove('hidden');
+		}
+	}, 1000)
+}
+
+function checkUpdate() {
+	ipcRenderer.send('check_update');
+	notification.classList.add('hidden');
+	checkUpdateNotificationButton.classList.add('hidden');
 }
 
 function restartApp() {
@@ -72,6 +96,7 @@ window.onload = function ready() {
   closeNotificationButton  = document.getElementById("close-button")
   restartNotificationButton  = document.getElementById("restart-button")
   downloadNotificationButton  = document.getElementById("download-button")
+  checkUpdateNotificationButton  = document.getElementById("check-update-button")
 	message = document.getElementById('message')
 	if (close) {
 		close.addEventListener('click', () => {
