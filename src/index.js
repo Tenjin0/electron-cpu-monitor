@@ -42,6 +42,9 @@ const createWindow = () => {
 					console.log('try to download')
 			})
 		.catch((err) => {
+				err.app_code = 'DOWNLOAD_UPDATE'
+				console.log('catch', err)
+				mainWindow.webContents.send("error", {message: err.message, code: err.app_code})
 				log.error(err)
 			})
 		}
@@ -91,7 +94,8 @@ const createWindow = () => {
 
 	autoUpdater.on('download-progress', (progressObj) => {
 		console.log(progressObj)
-		// https://www.electronjs.org/docs/tutorial/progress-bar
+		mainWindow.setProgressBar(progressObj.percent / 100)
+		mainWindow.webContents.send('download_progress', Math.round(progressObj.percent))
 	})
 
 	autoUpdater.on('update-not-available', () => {

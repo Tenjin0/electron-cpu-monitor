@@ -62,3 +62,8 @@ body {
 .hidden {
   display: none !important;
 }
+
+
+#download-progress {
+	width: 100%;
+}

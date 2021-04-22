@@ -8,6 +8,7 @@
     "postversion": "git push --follow-tags",
     "start": "NODE_ENV=development npx electron-forge start",
     "build": "electron-builder",
+    "build:dev": "NODE_ENV=development electron-builder",
     "postinstall": "electron-builder install-app-deps",
     "dist": "electron-builder --publish always",
     "pack": "electron-builder --dir"

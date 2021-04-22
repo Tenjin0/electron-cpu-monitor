@@ -5,11 +5,19 @@ const ipcRenderer = electron.ipcRenderer;
 let closeNotificationButton  = null
 let restartNotificationButton  = null
 let downloadNotificationButton  = null
+let downloadProgress = null
+let downloadProgressBar = null
 let checkUpdateNotificationButton  = null
 let notification = null
 let message = null
 // const restartButton = document.getElementById('restart-button');
 
+ipcRenderer.on('download_progress', (event, percent) => {
+	console.log('download_progress', percent)
+	if (downloadProgressBar) {
+		downloadProgressBar.style.width = percent + '%'
+	}
+})
 ipcRenderer.on('update_available', (event, version) => {
 	console.log('update_available', version)
   // ipcRenderer.removeAllListeners('update_available');
@@ -38,7 +46,19 @@ ipcRenderer.on("app_version", (event, data) => {
 	}, 10)
 })
 
-ipcRenderer.on("ready", () => {
+ipcRenderer.on("ready", (event) => {
+})
+
+ipcRenderer.on("error", (event, err) => {
+	console.log(err, err.code === "DOWNLOAD_UPDATE")
+
+	// if (err.code === "DOWNLOAD_UPDATE") {
+	// 	message.innerText = 'There was a problem updating the application'
+
+	// 	setTimeout(() => {
+	// 		closeNotification()
+	// 	}, 2000)
+	// }
 })
 
 ipcRenderer.on("cpu", (event, data) => {
@@ -59,6 +79,9 @@ function closeNotification() {
 	}
 	if (!closeNotificationButton.classList.contains("hidden")) {
 		closeNotificationButton.classList.add('hidden');
+	}
+	if (!downloadProgress.classList.contains("hidden")) {
+		downloadProgress.classList.add('hidden');
 	}
 	if (!downloadNotificationButton.classList.contains("hidden")) {
 		downloadNotificationButton.classList.add('hidden');
@@ -86,7 +109,16 @@ function restartApp() {
 
 function downloadUpdate() {
   ipcRenderer.send('download_update');
-	notification.classList.add('hidden');
+	if (downloadProgressBar) {
+		downloadProgressBar.style.width = '0%'
+	}
+	downloadProgress.classList.remove('hidden')
+	if (!closeNotificationButton.classList.contains("hidden")) {
+		closeNotificationButton.classList.add('hidden');
+	}
+	if (!downloadNotificationButton.classList.contains("hidden")) {
+		downloadNotificationButton.classList.add('hidden');
+	}
 }
 
 window.onload = function ready() {
@@ -97,6 +129,8 @@ window.onload = function ready() {
   restartNotificationButton  = document.getElementById("restart-button")
   downloadNotificationButton  = document.getElementById("download-button")
   checkUpdateNotificationButton  = document.getElementById("check-update-button")
+  downloadProgress  = document.getElementById("download-progress")
+  downloadProgressBar  = document.getElementById("progress-bar")
 	message = document.getElementById('message')
 	if (close) {
 		close.addEventListener('click', () => {
