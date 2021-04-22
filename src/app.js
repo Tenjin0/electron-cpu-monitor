@@ -13,7 +13,7 @@ ipcRenderer.on('update_available', (event, version) => {
 	console.log('update_available', version)
   ipcRenderer.removeAllListeners('update_available');
 	if (message) {
-		message.innerText = 'A new update is available. (' + version + ')';
+		message.innerText = 'Last update is available. (' + version + ')';
 	}
 	if (notification) {
 		notification.classList.remove('hidden');

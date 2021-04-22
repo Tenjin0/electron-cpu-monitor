@@ -78,6 +78,7 @@ const createWindow = () => {
 
 	autoUpdater.on('download-progress', (progressObj) => {
 		console.log(progressObj)
+		// https://www.electronjs.org/docs/tutorial/progress-bar
 	})
 
 	autoUpdater.on('update-not-available', () => {
