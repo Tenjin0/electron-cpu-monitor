@@ -133,10 +133,6 @@ const createWindow = () => {
 		// })
 	})
 
-
-
-
-
 	autoUpdater.allowDowngrade = true
 	autoUpdater.autoDownload = false
 	autoUpdater.logger = log;
