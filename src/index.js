@@ -11,6 +11,7 @@ const {inspect} = require('util')
 //   app.quit();
 // }
 
+
 let cancellationToken = null
 const createWindow = () => {
   // Create the browser window.
@@ -50,7 +51,9 @@ const createWindow = () => {
 		}
 	})
 
-
+	ipcMain.on('restart_app', () => {
+		autoUpdater.quitAndInstall()
+	})
 
 	ipcMain.on("app_version", () => {
 		mainWindow.webContents.send("app_version", app.getVersion())
@@ -113,19 +116,26 @@ const createWindow = () => {
 		console.error('There was a problem updating the application')
 		log.error(message)
 	})
-	autoUpdater.on('update-downloaded', (event, releaseNotes, releaseName) => {
-		const dialogOpts = {
-			type: 'info',
-			buttons: ['Restart', 'Later'],
-			title: 'Application Update',
-			message: process.platform === 'win32' ? releaseNotes : releaseName,
-			detail: "A new version has been downloaded. Restart the application to apply the updates."
-		}
+	autoUpdater.on('update-downloaded', (updateInfo) => {
+		mainWindow.webContents.send('update_downloaded', updateInfo);
 
-		dialog.showMessageBox(dialogOpts).then((returnValue) => {
-			if (returnValue.response === 0) autoUpdater.quitAndInstall()
-		})
+
+		// const dialogOpts = {
+		// 	type: 'info',
+		// 	buttons: ['Restart', 'Later'],
+		// 	title: 'Application Update',
+		// 	message: process.platform === 'win32' ? releaseNotes : releaseName,
+		// 	detail: "A new version has been downloaded. Restart the application to apply the updates."
+		// }
+
+		// dialog.showMessageBox(dialogOpts).then((returnValue) => {
+		// 	if (returnValue.response === 0) autoUpdater.quitAndInstall()
+		// })
 	})
+
+
+
+
 
 	autoUpdater.allowDowngrade = true
 	autoUpdater.autoDownload = false

@@ -12,12 +12,38 @@ let notification = null
 let message = null
 // const restartButton = document.getElementById('restart-button');
 
+ipcRenderer.on('download_updated', (event, info) => {
+
+	console.log(info)
+	if (notification.classList.contains("hidden")) {
+		notification.classList.remove('hidden');
+	}
+	if (restartNotificationButton.classList.contains("hidden")) {
+		restartNotificationButton.classList.add('hidden');
+	}
+})
+
 ipcRenderer.on('download_progress', (event, percent) => {
 	console.log('download_progress', percent)
 	if (downloadProgressBar) {
 		downloadProgressBar.style.width = percent + '%'
 	}
 })
+
+
+ipcRenderer.on('update_not_available', (event) => {
+  // ipcRenderer.removeAllListeners('update_available');
+	if (message) {
+		message.innerText = 'No update available';
+	}
+	if (notification) {
+		notification.classList.remove('hidden');
+	}
+	if (closeNotificationButton) {
+		closeNotificationButton.classList.remove('hidden');
+	}
+});
+
 ipcRenderer.on('update_available', (event, version) => {
 	console.log('update_available', version)
   // ipcRenderer.removeAllListeners('update_available');
@@ -73,6 +99,7 @@ ipcRenderer.on("total-mem", (event, data) => {
   document.getElementById("total-mem").innerHTML = data.toFixed(2)
 })
 
+
 function closeNotification() {
 	if (!notification.classList.contains("hidden")) {
 		notification.classList.add('hidden');
@@ -120,6 +147,7 @@ function downloadUpdate() {
 		downloadNotificationButton.classList.add('hidden');
 	}
 }
+
 
 window.onload = function ready() {
   const close = document.getElementById("close-app-button")
