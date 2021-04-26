@@ -96,7 +96,6 @@ const createWindow = () => {
 	});
 
 	autoUpdater.on('download-progress', (progressObj) => {
-		console.log(progressObj)
 		mainWindow.setProgressBar(progressObj.percent / 100)
 		mainWindow.webContents.send('download_progress', Math.round(progressObj.percent))
 	})
@@ -111,26 +110,15 @@ const createWindow = () => {
 		mainWindow.webContents.send('update_available', data.version);
 	});
 
+	autoUpdater.on('update-downloaded', (updateInfo) => {
+		console.log('update-downloaded')
+		mainWindow.webContents.send('update_downloaded', updateInfo);
+
+	})
 
 	autoUpdater.on('error', message => {
 		console.error('There was a problem updating the application')
 		log.error(message)
-	})
-	autoUpdater.on('update-downloaded', (updateInfo) => {
-		mainWindow.webContents.send('update_downloaded', updateInfo);
-
-
-		// const dialogOpts = {
-		// 	type: 'info',
-		// 	buttons: ['Restart', 'Later'],
-		// 	title: 'Application Update',
-		// 	message: process.platform === 'win32' ? releaseNotes : releaseName,
-		// 	detail: "A new version has been downloaded. Restart the application to apply the updates."
-		// }
-
-		// dialog.showMessageBox(dialogOpts).then((returnValue) => {
-		// 	if (returnValue.response === 0) autoUpdater.quitAndInstall()
-		// })
 	})
 
 	autoUpdater.allowDowngrade = true

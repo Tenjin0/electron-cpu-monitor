@@ -12,15 +12,16 @@ let notification = null
 let message = null
 // const restartButton = document.getElementById('restart-button');
 
-ipcRenderer.on('download_updated', (event, info) => {
+ipcRenderer.on('update_downloaded', (event, info) => {
+	setTimeout(() => {
+		if (!downloadProgress.classList.contains("hidden")) {
+			downloadProgress.classList.add('hidden');
+		}
+		if (restartNotificationButton.classList.contains("hidden")) {
+			restartNotificationButton.classList.remove('hidden');
+		}
+	}, 1000)
 
-	console.log(info)
-	if (notification.classList.contains("hidden")) {
-		notification.classList.remove('hidden');
-	}
-	if (restartNotificationButton.classList.contains("hidden")) {
-		restartNotificationButton.classList.add('hidden');
-	}
 })
 
 ipcRenderer.on('download_progress', (event, percent) => {
@@ -146,6 +147,8 @@ function downloadUpdate() {
 	if (!downloadNotificationButton.classList.contains("hidden")) {
 		downloadNotificationButton.classList.add('hidden');
 	}
+
+
 }
 
 
