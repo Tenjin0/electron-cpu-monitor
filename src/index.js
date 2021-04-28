@@ -1,50 +1,112 @@
-const { app, BrowserWindow, ipcMain, session, dialog } = require('electron');
+const { app, BrowserWindow, ipcMain, globalShortcut } = require('electron');
 const path = require('path');
 const os = require('os')
 const osUtils = require('os-utils');
-const package = require('../package.json')
 const { autoUpdater,  } = require('electron-updater');
 const log = require("electron-log");
-const {inspect} = require('util')
-// Handle creating/removing shortcuts on Windows when installing/uninstalling.
-// if (require('electron-squirrel-startup')) { // eslint-disable-line global-require
-//   app.quit();
-// }
 
-
+// log.transports.file.resolvePath = () => path.join(APP_DATA, 'logs/main.log');
+// log.transports.console.level = false;
 let cancellationToken = null
+let first = true;
+
 const createWindow = () => {
   // Create the browser window.
-  const mainWindow = new BrowserWindow({
-    fullscreen: false,
+	let mainWindow = null
+
+	globalShortcut.register('Control+Shift+I', () => {
+		// When the user presses Ctrl + Shift + I, this function will get called
+		// You can modify this function to do other things, but if you just want
+		// to disable the shortcut, you can just return false
+		if (mainWindow) {
+			mainWindow.webContents.openDevTools();
+		}
+		if (!loaderWindow.isDestroyed() && process.env.NODE_ENV === 'development') {
+			loaderWindow.webContents.openDevTools()
+			loaderWindow.setFullScreen(true)
+		}
+
+		return first;
+	});
+
+	const loaderWindow = new BrowserWindow({
+		center: true,
+		closable: false,
+		hasShadow: true,
+		show: false,
+		closable: false,
+		width: 300,
+		height: 120,
+		hasShadow: true,
+		frame: false,
+		alwaysOnTop: true,
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false
     },
-		show:false,
-		icon: path.join(__dirname, 'logo.png'),
-		fullscreen: true
-  });
 
-	mainWindow.loadFile(path.join(__dirname, 'index.html'));
-  mainWindow.show()
+	})
 
-	if (process.env.NODE_ENV && process.env.NODE_ENV === 'development') {
-		mainWindow.webContents.openDevTools();
-	}
+	loaderWindow.loadFile(path.join(__dirname, "loader", "index.html"))
+
+	loaderWindow.once('ready-to-show', () => {
+		loaderWindow.show()
+	})
+
+	ipcMain.on('loader_finish', () => {
+
+		loaderWindow.hide()
+		mainWindow = new BrowserWindow({
+			webPreferences: {
+				nodeIntegration: true,
+				contextIsolation: false
+			},
+			show:false,
+			frame: false,
+			kiosk: true,
+			icon: path.join(__dirname, 'logo.png'),
+		});
+
+		loaderWindow.close()
+		mainWindow.once('ready-to-show', () => {
+			osUtils.cpuUsage(function(v) {
+				mainWindow.webContents.send("cpu", v * 100)
+				mainWindow.webContents.send("mem", osUtils.freememPercentage() *  100)
+				mainWindow.webContents.send("total-mem", osUtils.totalmem() / 1024)
+				setInterval(() => {
+					mainWindow.webContents.send("cpu", v * 100)
+					mainWindow.webContents.send("mem", osUtils.freememPercentage() *  100)
+					mainWindow.webContents.send("total-mem", osUtils.totalmem() / 1024)
+				}, 1000)
+
+			})
+			mainWindow.show()
+			mainWindow.webContents.send("ready")
+
+			autoUpdater.checkForUpdates().then((updatedResult) => {
+				cancellationToken = updatedResult.cancellationToken
+				// console.log(updatedResult)
+				// mainWindow.webContents.send('update_available', updatedResult.updateInfo.version);
+			}).catch((err) => {
+				log.error(err)
+			})
+		});
+
+		mainWindow.loadFile(path.join(__dirname, "app", 'index.html'));
+
+	})
 
 	ipcMain.on("close", () => {
-		mainWindow.close()
+		if (mainWindow) {
+			mainWindow.close()
+		}
 	})
 
 	ipcMain.on("download_update", () => {
 		if (cancellationToken) {
-			return autoUpdater.downloadUpdate(cancellationToken).then(() => {
-					console.log('try to download')
-			})
-		.catch((err) => {
+			return autoUpdater.downloadUpdate(cancellationToken)
+			.catch((err) => {
 				err.app_code = 'DOWNLOAD_UPDATE'
-				console.log('catch', err)
 				mainWindow.webContents.send("error", {message: err.message, code: err.app_code})
 				log.error(err)
 			})
@@ -59,18 +121,6 @@ const createWindow = () => {
 		mainWindow.webContents.send("app_version", app.getVersion())
 	})
 
-  osUtils.cpuUsage(function(v) {
-    mainWindow.webContents.send("cpu", v * 100)
-    mainWindow.webContents.send("mem", osUtils.freememPercentage() *  100)
-    mainWindow.webContents.send("total-mem", osUtils.totalmem() / 1024)
-    setInterval(() => {
-      mainWindow.webContents.send("cpu", v * 100)
-      mainWindow.webContents.send("mem", osUtils.freememPercentage() *  100)
-      mainWindow.webContents.send("total-mem", osUtils.totalmem() / 1024)
-    }, 1000)
-
-  })
-
 
 	ipcMain.on("check_update", () => {
 		autoUpdater.checkForUpdates().then((updatedResult) => {
@@ -82,18 +132,7 @@ const createWindow = () => {
 		})
 	})
 
-	mainWindow.once('ready-to-show', () => {
-		mainWindow.show()
-		mainWindow.webContents.send("ready")
 
-		autoUpdater.checkForUpdates().then((updatedResult) => {
-			cancellationToken = updatedResult.cancellationToken
-			// console.log(updatedResult)
-			// mainWindow.webContents.send('update_available', updatedResult.updateInfo.version);
-		}).catch((err) => {
-			log.error(err)
-		})
-	});
 
 	autoUpdater.on('download-progress', (progressObj) => {
 		mainWindow.setProgressBar(progressObj.percent / 100)
@@ -101,23 +140,18 @@ const createWindow = () => {
 	})
 
 	autoUpdater.on('update-not-available', () => {
-		console.log('>>>>>>>update-not-available')
 		mainWindow.webContents.send('update_not_available');
 	});
 
 	autoUpdater.on('update-available', (data) => {
-		console.log('>>>>>>>update-available', data)
 		mainWindow.webContents.send('update_available', data.version);
 	});
 
 	autoUpdater.on('update-downloaded', (updateInfo) => {
-		console.log('update-downloaded')
 		mainWindow.webContents.send('update_downloaded', updateInfo);
-
 	})
 
 	autoUpdater.on('error', message => {
-		console.error('There was a problem updating the application')
 		log.error(message)
 	})
 

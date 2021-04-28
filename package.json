@@ -6,7 +6,7 @@
   "main": "src/index.js",
   "scripts": {
     "postversion": "git push --follow-tags",
-    "start": "NODE_ENV=development npx electron-forge start",
+    "start": "NODE_ENV=development npx electron .",
     "build": "electron-builder",
     "build:dev": "NODE_ENV=development electron-builder",
     "postinstall": "electron-builder install-app-deps",
