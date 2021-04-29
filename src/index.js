@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, globalShortcut } = require('electron');
+const { app, BrowserWindow, ipcMain, globalShortcut, screen } = require('electron');
 const path = require('path');
 const os = require('os')
 const osUtils = require('os-utils');
@@ -10,10 +10,27 @@ const log = require("electron-log");
 let cancellationToken = null
 let first = true;
 
+
 const createWindow = () => {
+	const screens = screen.getAllDisplays()
+	const choosenScreen = screens[0]
   // Create the browser window.
 	let mainWindow = null
+	mainWindow = new BrowserWindow({
+		webPreferences: {
+			nodeIntegration: true,
+			contextIsolation: false
+		},
+		x: choosenScreen.bounds.x + choosenScreen.size.width / 2 - 150,
+		y: choosenScreen.bounds.y + choosenScreen.size.height / 2 - 30,
+		width: 300,
+		height: 120,
+		show:false,
+		frame: false,
+		icon: path.join(__dirname, 'logo.png'),
+	});
 
+	mainWindow.hide()
 	globalShortcut.register('Control+Shift+I', () => {
 		// When the user presses Ctrl + Shift + I, this function will get called
 		// You can modify this function to do other things, but if you just want
@@ -28,7 +45,6 @@ const createWindow = () => {
 
 		return first;
 	});
-
 	const loaderWindow = new BrowserWindow({
 		center: true,
 		closable: false,
@@ -38,7 +54,11 @@ const createWindow = () => {
 		width: 300,
 		height: 120,
 		hasShadow: true,
+		x: choosenScreen.bounds.x + choosenScreen.size.width / 2 - 150,
+		y: choosenScreen.bounds.y + choosenScreen.size.height / 2 - 30,
 		frame: false,
+		parent: mainWindow,
+		modal: true,
 		alwaysOnTop: true,
     webPreferences: {
       nodeIntegration: true,
@@ -55,19 +75,7 @@ const createWindow = () => {
 
 	ipcMain.on('loader_finish', () => {
 
-		loaderWindow.hide()
-		mainWindow = new BrowserWindow({
-			webPreferences: {
-				nodeIntegration: true,
-				contextIsolation: false
-			},
-			show:false,
-			frame: false,
-			kiosk: true,
-			icon: path.join(__dirname, 'logo.png'),
-		});
 
-		loaderWindow.close()
 		mainWindow.once('ready-to-show', () => {
 			osUtils.cpuUsage(function(v) {
 				mainWindow.webContents.send("cpu", v * 100)
@@ -80,7 +88,6 @@ const createWindow = () => {
 				}, 1000)
 
 			})
-			mainWindow.show()
 			mainWindow.webContents.send("ready")
 
 			autoUpdater.checkForUpdates().then((updatedResult) => {
@@ -91,14 +98,23 @@ const createWindow = () => {
 				log.error(err)
 			})
 		});
-
 		mainWindow.loadFile(path.join(__dirname, "app", 'index.html'));
+		loaderWindow.hide()
+		setTimeout(() => {
+			mainWindow.setFullScreen(true)
+			mainWindow.show()
+			loaderWindow.close()
+		}, 200)
 
 	})
 
 	ipcMain.on("close", () => {
 		if (mainWindow) {
 			mainWindow.close()
+		}
+
+		if (!loaderWindow.isDestroyed()) {
+			loaderWindow.close()
 		}
 	})
 
