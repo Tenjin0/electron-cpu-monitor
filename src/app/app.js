@@ -25,7 +25,6 @@ ipcRenderer.on('update_downloaded', (event, info) => {
 })
 
 ipcRenderer.on('download_progress', (event, percent) => {
-	console.log('download_progress', percent)
 	if (downloadProgressBar) {
 		downloadProgressBar.style.width = percent + '%'
 	}

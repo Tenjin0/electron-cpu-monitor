@@ -10,7 +10,6 @@ const log = require("electron-log");
 let cancellationToken = null
 let first = true;
 
-
 const createWindow = () => {
 	const screens = screen.getAllDisplays()
 	const choosenScreen = screens[0]
@@ -39,8 +38,8 @@ const createWindow = () => {
 			mainWindow.webContents.openDevTools();
 		}
 		if (!loaderWindow.isDestroyed() && process.env.NODE_ENV === 'development') {
-			loaderWindow.webContents.openDevTools()
 			loaderWindow.setFullScreen(true)
+			loaderWindow.webContents.openDevTools()
 		}
 
 		return first;
@@ -57,9 +56,7 @@ const createWindow = () => {
 		x: choosenScreen.bounds.x + choosenScreen.size.width / 2 - 150,
 		y: choosenScreen.bounds.y + choosenScreen.size.height / 2 - 30,
 		frame: false,
-		parent: mainWindow,
-		modal: true,
-		alwaysOnTop: true,
+		enableLargerThanScreen: true,
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false
