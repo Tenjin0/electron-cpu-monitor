@@ -28,7 +28,6 @@ const createWindow = () => {
 		frame: false,
 		icon: path.join(__dirname, 'logo.png'),
 	});
-
 	mainWindow.hide()
 	globalShortcut.register('Control+Shift+I', () => {
 		// When the user presses Ctrl + Shift + I, this function will get called
@@ -134,7 +133,6 @@ const createWindow = () => {
 		mainWindow.webContents.send("app_version", app.getVersion())
 	})
 
-
 	ipcMain.on("check_update", () => {
 		autoUpdater.checkForUpdates().then((updatedResult) => {
 			cancellationToken = updatedResult.cancellationToken
@@ -144,8 +142,6 @@ const createWindow = () => {
 			log.error(err)
 		})
 	})
-
-
 
 	autoUpdater.on('download-progress', (progressObj) => {
 		mainWindow.setProgressBar(progressObj.percent / 100)
